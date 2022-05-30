@@ -1,48 +1,5 @@
 ﻿namespace Strawberry;
 
-public enum TextureFilter
-{
-    Nearest,
-    Linear
-}
-
-public enum TextureWrap
-{
-    Repeat,
-    MirrorRepeat,
-    Clamp,
-}
-
-public sealed class TextureSampler
-{
-    // texture filtering
-    public TextureFilter Filter = TextureFilter.Linear;
-
-    // texture wrapping
-    public TextureWrap WrapS = TextureWrap.Repeat;
-    public TextureWrap WrapT = TextureWrap.Repeat;
-    public TextureWrap WrapR = TextureWrap.Repeat;
-
-    // depth texture comparison
-    public bool EnableDepthComparison = true;
-    public CompareFunc DepthComparison = CompareFunc.LessEqual;
-}
-
-public enum TextureFormat
-{
-    // todo: determine preferable subset to use
-}
-
-public enum TextureCubeFace
-{
-    PositiveX,
-    NegativeX,
-    PositiveY,
-    NegativeY,
-    PositiveZ,
-    NegativeZ,
-}
-
 public abstract class Texture
 {
     public static bool IsColorRenderable(TextureFormat format)
@@ -95,41 +52,46 @@ public sealed class TextureCube : Texture
 
 }
 
-public struct Viewport
+public sealed class TextureSampler
 {
-    // todo: or Rectangle?!
+    // texture filtering
+    public TextureFilter Filter = TextureFilter.Linear;
+
+    // texture wrapping
+    public TextureWrap WrapS = TextureWrap.Repeat;
+    public TextureWrap WrapT = TextureWrap.Repeat;
+    public TextureWrap WrapR = TextureWrap.Repeat;
+
+    // depth texture comparison
+    public bool EnableDepthComparison = true;
+    public CompareFunc DepthComparison = CompareFunc.LessEqual;
 }
 
-public abstract class Graphics
+public enum TextureFilter
 {
-    public abstract GraphicsScope BeginGraphics(Framebuffer? framebuffer, Viewport? viewport = null);
-    public abstract ComputeScope BeginCompute();
-
-
-    private void test()
-    {
-        using var g0 = BeginGraphics(null, null);
-        
-        g0.Draw(...);
-
-        using var g1 = BeginGraphics(framebuffer, null);
-        
-        g0.Draw(...);
-    }
+    Nearest,
+    Linear
 }
 
-public ref struct GraphicsScope
+public enum TextureFormat
 {
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
+    // todo: determine preferable subset to use
+    // (R,RG,RGB,RGBA)(8,16,32)(,U,I), etc
 }
 
-public ref struct ComputeScope
+public enum TextureWrap
 {
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
+    Repeat,
+    MirrorRepeat,
+    Clamp,
+}
+
+public enum TextureCubeFace
+{
+    PositiveX,
+    NegativeX,
+    PositiveY,
+    NegativeY,
+    PositiveZ,
+    NegativeZ,
 }
