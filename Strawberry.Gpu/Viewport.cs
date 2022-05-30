@@ -1,4 +1,4 @@
-namespace Strawberry;
+namespace Strawberry.Gpu;
 
 public struct Viewport
 {

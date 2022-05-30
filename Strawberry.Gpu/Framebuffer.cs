@@ -1,6 +1,6 @@
-namespace Strawberry;
+namespace Strawberry.Gpu;
 
-public sealed class Framebuffer
+public sealed class Framebuffer : IDisposable
 {
     public FramebufferAttachment[] ColorAttachments { get; }
 
@@ -12,6 +12,8 @@ public sealed class Framebuffer
         // todo: validate depthAttachment is actually depth format
         throw new NotImplementedException();
     }
+
+    // todo: implement IDisposable explicit w/ dispose pattern
 }
 
 public readonly struct FramebufferAttachment

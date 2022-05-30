@@ -1,6 +1,6 @@
-﻿namespace Strawberry;
+﻿namespace Strawberry.Gpu;
 
-public abstract class Texture
+public abstract class Texture : IDisposable
 {
     public TextureFormat Format { get; }
 
@@ -10,6 +10,8 @@ public abstract class Texture
     {
         throw new NotImplementedException();
     }
+
+    // todo: implement IDisposable explicit w/ dispose pattern
 
     public static bool IsColorRenderable(TextureFormat format)
     {

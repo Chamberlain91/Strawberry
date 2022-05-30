@@ -1,6 +1,6 @@
-namespace Strawberry;
+namespace Strawberry.Gpu;
 
-public abstract class Buffer
+public abstract class Buffer : IDisposable
 {
     protected Buffer(uint capacity)
     {
@@ -9,7 +9,13 @@ public abstract class Buffer
 
     public uint Capacity { get; }
 
-    // todo: map/unmap, subdata
+    // todo: implement IDisposable explicit w/ dispose pattern
+
+    // todo: perhaps also ArraySegment<T> if T[] fails to implicitly convert to ReadOnlySpan<T>
+
+    public abstract void Update<T>(ReadOnlySpan<T> data, int offset = 0) where T : unmanaged;
+
+    // todo: map/unmap?
 }
 
 public sealed class VertexBuffer : Buffer

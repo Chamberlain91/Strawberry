@@ -1,12 +1,14 @@
-namespace Strawberry;
+namespace Strawberry.Gpu;
 
 public abstract class GpuContext
 {
+    // todo: Perhaps pipelines could be folded into the `Draw` or `Dispatch` calls?
+
     // ------------------------------------------------------------------------
     // GRAPHICS CONTEXT
     // ------------------------------------------------------------------------
 
-    public abstract void SetGraphicsPipeline(GraphicsPipeline pipeline);
+    public abstract void SetGraphicsPipeline(GraphicsPipeline pipeline); 
 
     // RENDER INPUT (MESH DATA)
 
@@ -36,7 +38,7 @@ public abstract class GpuContext
 
     public abstract void SetComputePipeline(ComputePipeline pipeline);
 
-    public abstract void Dispatch(int numGroupX, int numGroupY, int numGroupZ);
+    public abstract void Dispatch(int numGroupX, int numGroupY = 1, int numGroupZ = 1);
 
     // ------------------------------------------------------------------------
     // SHARED CONTEXT
@@ -65,7 +67,18 @@ public abstract class GpuContext
     public abstract void MemoryBarrier(MemoryBarrier barrier);
 }
 
-public enum ElementType : uint { U16, U32 }
+[Flags]
+public enum MemoryBarrier : uint
+{
+    // todo: remainder of the barrier bits
+    All
+}
+
+public enum ElementType : uint
+{
+    U16,
+    U32
+}
 
 public enum MeshTopology : uint
 {
@@ -74,12 +87,20 @@ public enum MeshTopology : uint
     Points
 }
 
-public abstract class GpuPipeline { }
+public abstract class GpuPipeline
+{
+    // todo: implement IDisposable explicit w/ dispose pattern
+}
 
-public abstract class ComputePipeline : GpuPipeline { }
+public abstract class ComputePipeline : GpuPipeline
+{
+    public ComputeShader Shader { get; }
+}
 
 public abstract class GraphicsPipeline : GpuPipeline
 {
+    public GraphicsShader Shader { get; }
+
     public MeshTopology topology;
     // todo: input attribute state
     // todo: raster state (culling)
@@ -87,16 +108,31 @@ public abstract class GraphicsPipeline : GpuPipeline
     // todo: color blend state (blending, mask)
 }
 
-public abstract class GpuPiplineResources
+public abstract class GpuShader : IDisposable
+{
+    // todo: implement IDisposable explicit w/ dispose pattern
+    
+    // todo: shader reflection?
+}
+
+public abstract class GraphicsShader : GpuShader
+{
+    // note: in Javelin, this internally tracked relevant VAOs to dispose with it
+}
+
+public abstract class ComputeShader : GpuShader
+{
+    public readonly int LocalSizeX;
+
+    public readonly int LocalSizeY;
+
+    public readonly int LocalSizeZ;
+}
+
+public abstract class GpuPiplineResources // todo: proper concept
 {
     // todo: buffer bindings (uniform, storage)
     // todo: image bindings (samplers, images) 
-}
-
-public enum MemoryBarrier : uint
-{
-    // todo: remainder
-    All
 }
 
 public enum CompareFunc
