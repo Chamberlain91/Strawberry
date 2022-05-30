@@ -15,19 +15,19 @@ public abstract class GpuContext
 
     // RENDER OUTPUT (RENDER ATTACHMENTS)
 
-    // todo: improve this?
-    public abstract void SetRenderTarget(Framebuffer framebuffer, Viewport? viewport = null);
+    // note: Changing the framebuffer will clear scissor state
+    public abstract void SetFramebuffer(Framebuffer framebuffer, Viewport? viewport = null);
 
     // note: Lazily evaluated to combine flags, etc
     public abstract void ClearColor(float r, float g, float b, float a = 1F);
     public abstract void ClearDepth(float depth = 1F);
 
     public abstract void SetViewport(Viewport viewport); // update the viewport
-    public abstract void SetScissor(Viewport? viewport); // null to disable?
+    public abstract void SetScissor(Viewport? scissor);  // null to disable?
 
     // todo: Implement the ability to blit framebuffers
 
-    public abstract void DrawIndirect(Buffer indirectBuffer, uint offset, int indirectCount = 1); // glDrawElementsIndirect (or glMultiDrawElementsIndirect)
+    public abstract void DrawIndirect(Buffer indirectBuffer, uint offset, int indirectCount = 1); // multiple glDrawElementsIndirect (or glMultiDrawElementsIndirect)
     public abstract void Draw(int vertexCount, uint offset = 0, int instances = 1); // glDrawElements
 
     // ------------------------------------------------------------------------
@@ -42,30 +42,27 @@ public abstract class GpuContext
     // SHARED CONTEXT
     // ------------------------------------------------------------------------
 
-    public abstract void SetUniformBuffer(uint index, Buffer buffer);
+    // todo: C# source generators to somehow enforce type safety and assignment of these resources?
+
+    public abstract void SetUniformBuffer(uint index, Buffer buffer); // glBindBufferRange
     public abstract void SetUniformBuffer(uint index, Buffer buffer, uint offset, uint size);
 
-    public abstract void SetStorageBuffer(uint index, Buffer buffer);
+    public abstract void SetStorageBuffer(uint index, Buffer buffer); // glBindBufferRange
     public abstract void SetStorageBuffer(uint index, Buffer buffer, uint offset, uint size);
 
-    // todo: fwog has these as TextureView
-    public abstract void SetTexture(uint index, Texture texture, TextureSampler sampler); // TextureSampler.Default
-    public abstract void SetImage(uint index, Texture texture, int mipLevel = 0);
+    public abstract void SetSampler(uint index, TextureSampler sampler, Texture2D texture); // glActiveTexture + glBindTexture
+    public abstract void SetSampler(uint index, TextureSampler sampler, Texture2DArray texture, int layer);
+    public abstract void SetSampler(uint index, TextureSampler sampler, TextureCube texture, TextureCubeFace face);
+    public abstract void SetSampler(uint index, TextureSampler sampler, Texture3D texture, int layer);
+
+    public abstract void SetImage(uint index, Texture2D texture, int mipLevel = 0); // glBindImageTexture
+    public abstract void SetImage(uint index, Texture2DArray texture, int layer, int mipLevel = 0);
+    public abstract void SetImage(uint index, TextureCube texture, TextureCubeFace face, int mipLevel = 0);
+    public abstract void SetImage(uint index, Texture3D texture, int layer, int mipLevel = 0);
 
     // [SYNCHRONIZATION]
 
     public abstract void MemoryBarrier(MemoryBarrier barrier);
-
-    public abstract GpuFence CreateFence();
-    public abstract void WaitCpu(GpuFence fence); // todo: error prone name
-    public abstract void WaitGpu(GpuFence fence);
-    // todo: DeleteFence?
-}
-
-public abstract class Framebuffer
-{
-    // todo: implement ability to define render targets?
-    // todo: copy from Javelin?
 }
 
 public enum ElementType : uint { U16, U32 }
@@ -96,21 +93,10 @@ public abstract class GpuPiplineResources
     // todo: image bindings (samplers, images) 
 }
 
-public struct GpuFence { private uint _value; }
-
 public enum MemoryBarrier : uint
 {
     // todo: remainder
     All
-}
-
-public readonly struct TextureAttachment
-{
-    // note: Texture2D implicitly can convert to TextureAttachment
-
-    public readonly Texture Texture;
-    // todo: layer/slice
-    // todo: mip level 
 }
 
 public enum CompareFunc
