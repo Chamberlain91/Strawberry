@@ -8,20 +8,29 @@ public abstract class GpuContext
     // GRAPHICS CONTEXT
     // ------------------------------------------------------------------------
 
-    public abstract void SetGraphicsPipeline(GraphicsPipeline pipeline); 
+    public abstract void SetGraphicsPipeline(GraphicsPipeline pipeline);
+    // shaders know actual attributes used via reflection
+
+    // buffer 0
+    // layout(location = 0) in vec3 a_position; 
+    // layout(location = 1) in vec3 a_normal;
+    // layout(location = 2) in vec2 a_uv;
+    // buffer 1
+    // layout(location = 3) in mat4 i_transform;
+    // layout(location = 7) in vec4 i_color;
 
     // RENDER INPUT (MESH DATA)
 
-    public abstract void SetIndexBuffer(Buffer? buffer, ElementType elementType = ElementType.U32); // glVertexArrayElementBuffer
-    public abstract void SetVertexBuffer(uint index, VertexBuffer buffer, uint offset = 0); // glVertexArrayVertexBuffer
+    public abstract void SetVertexBuffer(Buffer buffer, VertexBufferDescription description, uint index = 0, uint offset = 0); // glBindVertexBuffer(...)
+    public abstract void SetIndexBuffer(Buffer? buffer, ElementType elementType = ElementType.UnsignedInteger); // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ...)
 
     // RENDER OUTPUT (RENDER ATTACHMENTS)
 
-    // note: Changing the framebuffer will clear scissor state
+    // NOTE: Changing the framebuffer will clear scissor state
     public abstract void SetFramebuffer(Framebuffer framebuffer, Viewport? viewport = null);
 
-    // note: Lazily evaluated to combine flags, etc
-    public abstract void ClearColor(float r, float g, float b, float a = 1F);
+    // NOTE: Lazily evaluated to combine flags, etc
+    public abstract void ClearColor(float r = 0F, float g = 0F, float b = 0F, float a = 1F);
     public abstract void ClearDepth(float depth = 1F);
 
     public abstract void SetViewport(Viewport viewport); // update the viewport
@@ -101,17 +110,58 @@ public abstract class GraphicsPipeline : GpuPipeline
 {
     public GraphicsShader Shader { get; }
 
-    public MeshTopology topology;
-    // todo: input attribute state
-    // todo: raster state (culling)
-    // todo: depth state (enable, mask, compare)
-    // todo: color blend state (blending, mask)
+    // "how to assemble render primitives"
+    public MeshTopology Topology;
+
+    // "how to read vertex attributes from vertex buffers"
+    public VertexLayout Layout;
+
+    // glVertexBindingDivisor(buffer, divisor)
+    // for each attribute in buffer:
+    //   glEnableVertexAttribArray(attribute)
+    //   glVertexAttribBinding(attribute, buffer)
+    //   glVertexAttribFormat(attribute, ...)
+
+    // TODO: Culling Mode
+
+    // TODO: Depth Enable
+    // TODO: Depth Compare Mode
+    // TODO: Depth Write Mask
+
+    // TODO: Color Blending Mode
+    // TODO: Color Write Mask
+}
+
+public enum CullingMode : byte
+{
+    None,
+    Front,
+    Back
+}
+
+public enum BlendMode : byte
+{
+    Opaque,   // blending disabled
+    Add,      // ...?
+    Subtract, // ...?
+    Multiply  // ...?
+}
+
+[Flags]
+public enum MaskRGBA : byte
+{
+    R = 1 << 0,
+    G = 1 << 1,
+    B = 1 << 2,
+    A = 1 << 3,
+
+    RGBA = R | G | B | A,
 }
 
 public abstract class GpuShader : IDisposable
 {
     // todo: implement IDisposable explicit w/ dispose pattern
-    
+
     // todo: shader reflection?
 }
 
